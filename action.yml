@@ -1,0 +1,24 @@
+name: Who Is Flakiest?
+description: Reports test results to https://www.whoisflakiest.dev
+inputs:
+  api_token:
+    required: true
+    description: The API key
+  path_to_reports_dir:
+    required: true
+    description: The path to the directory with the reports
+runs:
+  using: "composite"
+  steps:
+    - name: Uploading Test Results
+      shell: bash
+      run: |
+        export WIF_API_TOKEN=${{ inputs.api_token }}
+        export WIF_PATH_TO_REPORTS_DIR=${{ inputs.path_to_reports_dir }}
+
+        github_context=${{ github }}
+        github_context=$(echo $github_context | base64 -w 0)
+
+        ${{ github.action_path }}/report-results.sh $(echo $github_context | basenc --base64url -w 0)
+
+        unset WIF_API_TOKEN
